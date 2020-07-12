@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto createUser(UserDto user) {
 		
-		
+		//create user
 		if(userRepository.findByEmail(user.getEmail()) != null) throw new RuntimeException("Record already exists");
 		
 		UserEntity userEntity = new UserEntity();
