@@ -1,14 +1,17 @@
 package com.example.demo.service.impl;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.UserRepository;
 import com.example.demo.io.entity.UserEntity;
+import com.example.demo.io.repositories.UserRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.ui.controller.shared.Utils;
 import com.example.demo.ui.controller.shared.dto.UserDto;
@@ -43,17 +46,38 @@ public class UserServiceImpl implements UserService {
 		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 				
 		UserEntity storedUserDetails = userRepository.save(userEntity);
-		UserDto returnValue = new UserDto();
 		
+		UserDto returnValue = new UserDto();
 		BeanUtils.copyProperties(storedUserDetails, returnValue);
 		
 		return returnValue;
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public UserDto getUser(String email) {
+		UserEntity  userEntity = userRepository.findByEmail(email);
 		
-		return null;
+		if(userEntity == null) throw new UsernameNotFoundException(email);
+		
+		UserDto returnValue = new UserDto();
+		BeanUtils.copyProperties(userEntity, returnValue);
+		
+		return returnValue;
+
+	}
+	
+	
+	
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		
+	UserEntity userEntity	= userRepository.findByEmail(email);
+	
+	if(userEntity == null) throw new UsernameNotFoundException(email);
+		
+	return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+	
+		
 	}
 
 }
